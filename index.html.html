@@ -1,0 +1,408 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>How Well Do You Know Rohit</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Caveat:wght@600&display=swap">
+<style>
+/* Layout: one card, four pages in sequence: rules -> quiz -> score -> verdict */
+:root{
+  --bg:#fbe3ea; --bg2:#f7c9d6; --ink:#4a1f3d; --soft:#8a5a78; --rose:#e2557f; --card:#fff7f9;
+  --ok:#d8f2dd; --okb:#7cc58a; --bad:#ffe0e6;
+  --f-display:"Fredoka",ui-rounded,system-ui,sans-serif; --f-hand:"Caveat","Comic Sans MS",cursive;
+  color-scheme:light;
+}
+html,body{min-height:100%;margin:0}
+body{background:radial-gradient(circle at 20% 10%,var(--bg2),var(--bg) 60%) fixed;color:var(--ink);font-family:var(--f-display);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-top:16px;padding-bottom:calc(150px + env(safe-area-inset-bottom,0px));
+  box-sizing:border-box;display:flex;justify-content:center;align-items:flex-start;overflow-x:hidden}
+[hidden]{display:none!important}
+.card{width:100%;max-width:400px;background:var(--card);border-radius:28px;padding:18px 16px 22px;box-sizing:border-box;box-shadow:0 18px 40px -18px rgba(74,31,61,.35)}
+.page{display:flex;flex-direction:column;gap:12px;align-items:center;text-align:center}
+.step{font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;color:var(--soft);font-weight:600}
+h1{font-size:1.5rem;margin:0;line-height:1.15;text-wrap:balance}
+p{margin:0;line-height:1.45}
+.names{font-family:var(--f-hand);font-size:1.6rem}
+.names span{color:var(--rose)}
+.hand{font-family:var(--f-hand);font-size:1.45rem;color:var(--rose);line-height:1.1}
+.sub{color:var(--soft);font-size:.93rem}
+.ele{width:120px;transition:transform .2s}
+.shake{animation:sob .45s ease-in-out 2}
+@keyframes sob{0%,100%{transform:translateX(0) rotate(0)}25%{transform:translateX(-6px) rotate(-4deg)}75%{transform:translateX(6px) rotate(4deg)}}
+.rules{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px;width:100%;text-align:left}
+.rules li{display:flex;gap:10px;align-items:flex-start;background:#fff;border:2px solid var(--bg2);border-radius:14px;padding:10px 12px}
+.rules b{color:var(--rose);font-size:1.05rem;min-width:1.4rem}
+.btn{font-family:var(--f-display);font-weight:600;border:0;border-radius:999px;cursor:pointer;padding:12px 30px;font-size:1.1rem;
+  background:var(--rose);color:#fff;box-shadow:0 8px 18px -8px var(--rose)}
+.btn:disabled{opacity:.45;cursor:default}
+button:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+.hud{display:flex;align-items:center;gap:10px;width:100%;font-weight:600;font-size:.92rem}
+.bar{flex:1;height:10px;background:var(--bg2);border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--rose);border-radius:99px;transition:width .3s}
+.opts{display:flex;flex-direction:column;gap:8px;width:100%}
+.opt{background:#fff;border:2px solid var(--bg2);border-radius:14px;padding:12px 14px;font:600 1rem var(--f-display);color:var(--ink);cursor:pointer;text-align:left}
+.opt.right{background:var(--ok);border-color:var(--okb)}
+.opt.picked{background:#f3e3ea;border-color:var(--ink)}
+.opt.wrong{background:var(--bad);border-color:var(--rose)}
+.react{min-height:1.6em}
+.big{font-size:4rem;font-weight:700;line-height:1;color:var(--rose);font-variant-numeric:tabular-nums}
+.big small{font-size:1.6rem;color:var(--soft)}
+.review{width:100%;display:flex;flex-direction:column;gap:6px;text-align:left;font-size:.9rem;margin:0;padding:0;list-style:none}
+.review li{display:flex;gap:8px;align-items:flex-start;padding:6px 10px;border-radius:10px;background:#fff}
+.review li.ok{border-left:4px solid var(--okb)}
+.review li.no{border-left:4px solid var(--rose)}
+.note{background:#fff;border:2px dashed var(--bg2);border-radius:16px;padding:14px 16px;text-align:left;display:flex;flex-direction:column;gap:8px;width:100%;box-sizing:border-box}
+.speech{position:relative;margin-top:4px}
+.speech::before{content:"";position:absolute;top:-12px;left:50%;transform:translateX(-50%);border:10px solid transparent;border-bottom-color:var(--bg2);border-top:0}
+.sign{font-family:var(--f-hand);font-size:1.35rem;color:var(--rose);text-align:right}
+.stage{position:relative;width:100%;aspect-ratio:3/4;border-radius:20px;overflow:hidden;background:linear-gradient(#ffd9e3,#ffeef3)}
+.stage canvas{display:block;width:100%;height:100%;touch-action:none}
+.over{position:absolute;inset:0;background:rgba(255,247,249,.95);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:18px;box-sizing:border-box}
+.toast{position:absolute;left:50%;top:12px;transform:translateX(-50%);background:#fff;color:var(--rose);font-family:var(--f-hand);font-size:1.3rem;padding:6px 14px;border-radius:14px;box-shadow:0 6px 16px -8px rgba(74,31,61,.4);width:max-content;max-width:88%;transition:opacity .3s;pointer-events:none;z-index:3}
+/* walk scene */
+.walk{position:relative;width:100%;height:220px;border-radius:20px;overflow:hidden;background:linear-gradient(#ffd9e3 0 70%,#bfe3c5 70%)}
+.walk .curtain{position:absolute;right:6%;bottom:22%;width:34%;height:62%;background:#e2557f;border-radius:10px 10px 0 0;box-shadow:inset 0 -10px 0 #b8406a}
+.walk .curtain::after{content:"QUIZ STAGE";position:absolute;top:-20px;color:var(--rose)!important;left:0;right:0;color:#fff;font:600 .72rem var(--f-display);letter-spacing:.1em}
+.walk .pair{position:absolute;left:4%;bottom:12%;display:flex;align-items:flex-end;gap:0;width:50%;animation:walk 3.4s ease-in-out forwards}
+.walk .pair img{width:44%}
+.walk .pair .who{width:50%}
+.who svg{width:100%;height:auto;display:block}
+.walk .pair>*{animation:step .4s ease-in-out infinite alternate}
+@keyframes walk{to{left:24%}}
+@keyframes step{from{transform:translateY(0)}to{transform:translateY(-6px)}}
+/* door scene */
+.doorway{position:relative;width:100%;height:260px;border-radius:20px;overflow:hidden;background:linear-gradient(#ffe9ef,#ffd9e3)}
+.doorway .inside{position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:center;gap:0;padding-bottom:6px}
+.doorway .inside .who{width:34%}
+.doorway .inside .momo{font-size:2.2rem;margin-bottom:24px}
+.door{position:absolute;top:0;bottom:0;width:50%;background:repeating-linear-gradient(90deg,#8a5a3a 0 18px,#7a4e32 18px 20px);transition:transform 1.6s ease-in-out;z-index:2}
+.door.l{left:0;transform-origin:left;border-right:2px solid #5e3a24}
+.door.r{right:0;transform-origin:right;border-left:2px solid #5e3a24}
+.door.l::after,.door.r::after{content:"";position:absolute;top:50%;width:10px;height:10px;border-radius:50%;background:#ffd166}
+.door.l::after{right:10px}.door.r::after{left:10px}
+.doorway.open .door.l{transform:perspective(600px) rotateY(80deg)}
+.doorway.open .door.r{transform:perspective(600px) rotateY(-80deg)}
+.lock{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:2.6rem;z-index:3}
+.flyarms .arms{opacity:1}
+.walk .curtain{overflow:visible}
+.walk .rw{position:absolute;left:50%;bottom:0;width:78%;transform:translateX(-50%);transform-origin:50% 100%;animation:lean 2.4s ease-in-out infinite}
+@keyframes lean{0%,100%{transform:translateX(-50%) rotate(0)}50%{transform:translateX(-50%) rotate(-6deg)}}
+.walk.arrived .rw{animation:wave .5s ease-in-out 4}
+@keyframes wave{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(-10px)}}
+.fh{position:absolute;left:30%;bottom:70%;font-size:1rem;opacity:0;animation:floatup 2.6s ease-in infinite}
+.fh.h2{left:55%;animation-delay:.9s}.fh.h3{left:42%;animation-delay:1.7s}
+@keyframes floatup{0%{transform:translateY(0) scale(.6);opacity:0}20%{opacity:1}100%{transform:translate(-30px,-60px) scale(1.2);opacity:0}}
+.walk .pair .link{position:absolute;left:47%;bottom:30%;font-size:1rem;z-index:2;animation:none}
+.walk .pair{position:absolute}
+#fx{position:fixed;inset:0;pointer-events:none;z-index:9}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<canvas id="fx"></canvas>
+<main class="card">
+
+<!-- PAGE 1: RULES -->
+<section class="page" id="p1">
+  <p class="step">Step 1 of 5 &middot; The rules</p>
+  <p class="names">Shruchi <span>&#10084;</span> Rohit</p>
+  <img class="ele" id="e1" alt="Baby elephant">
+  <div class="note speech">
+    <p class="hand">Hey Shruchi, good morning! &#9728;&#65039;</p>
+    <p>I have good news&hellip; <b>your love Rohit has reached Jagdalpur!</b> &#128205;</p>
+    <p>I can help you meet him. First, feed me <b>10 momos</b>, and <b>no chilies</b>. If you make it, I'll take you to Rohit.</p>
+    <p>Then I'll conduct a test. Score <b>80% or more</b> and I'll take you to meet Rohit and convince him to meet you. &#128150;</p>
+    <p class="sign">Your baby elephant &#128024;</p>
+  </div>
+  <ul class="rules">
+    <li><b>1</b><span>Feed the baby elephant 10 momos. Even one chili and he refuses to help. Then he holds your hand and walks you to the quiz stage.</span></li>
+    <li><b>2</b><span>There are <span class="qn">16</span> questions about Rohit.</span></li>
+    <li><b>3</b><span>Each correct answer is 1 point. No going back once you tap, and you'll only see your result at the end.</span></li>
+    <li><b>4</b><span>Score <strong><span class="pn">13</span> or more</strong> (80%) and the door opens: Rohit meets you for a momo date.</span></li>
+    <li><b>5</b><span>Score <strong>below <span class="pn">13</span></strong> and the door stays locked. No meeting.</span></li>
+  </ul>
+  <p class="hand">No Googling. No calling Rohit for hints.</p>
+  <button class="btn" id="startB">I'm ready</button>
+</section>
+
+<!-- FEED -->
+<section class="page" id="pf" hidden>
+  <p class="step">Step 2 of 5 &middot; Feed the elephant</p>
+  <div class="hud"><span>&#129375;</span><div class="bar"><i id="fProg"></i></div><span id="fScore">0/10</span></div>
+  <div class="stage">
+    <canvas id="fCv" aria-label="Feed the baby elephant"></canvas>
+    <div class="toast" id="fToast" style="opacity:0"></div>
+    <div class="over" id="fStart">
+      <h1>Feed me 10 momos &#129375;</h1>
+      <p>Drag me left and right to catch the momos.</p>
+      <p class="hand">Not even ONE chili &#127798;&#65039; or I won't take you to Rohit!</p>
+      <button class="btn" id="fGo">Start feeding</button>
+    </div>
+    <div class="over" id="fFail" hidden>
+      <img class="ele" id="eFail" alt="Crying elephant">
+      <h1>Bye bye Shruchi &#128557;</h1>
+      <p class="hand" id="failLine">I don't want to take you to Rohit. You are careless!</p>
+      <button class="btn" id="fRetry" hidden>Take another chance</button>
+    </div>
+  </div>
+</section>
+
+<!-- WALK -->
+<section class="page" id="pw" hidden>
+  <h1>He's full! Now he holds your hand&hellip;</h1>
+  <div class="walk"><div class="curtain"><div class="who rw" id="himW"></div><span class="fh h1">&#10084;&#65039;</span><span class="fh h2">&#128150;</span><span class="fh h3">&#10084;&#65039;</span></div><div class="pair"><div class="who" id="herW"></div><span class="link">&#129293;</span><img id="eW" alt="Elephant holding her hand"></div></div>
+  <p class="hand" id="wLine">&ldquo;Come with me, Shruchi. Rohit left you some questions.&rdquo;</p>
+  <button class="btn" id="wGo" hidden>Go on stage</button>
+</section>
+
+<!-- PAGE 2: QUIZ -->
+<section class="page" id="p2" hidden>
+  <p class="step">Step 3 of 5 &middot; The quiz</p>
+  <div class="hud"><span id="qNum"></span><div class="bar"><i id="qBar"></i></div><span id="qPts">&#128274;</span></div>
+  <img class="ele" id="e2" alt="Quiz elephant" style="width:96px">
+  <h1 id="qText"></h1>
+  <div class="opts" id="qOpts"></div>
+  <p class="hand react" id="qReact"></p>
+</section>
+
+<!-- PAGE 3: SCORE -->
+<section class="page" id="p3" hidden>
+  <p class="step">Step 4 of 5 &middot; Your score</p>
+  <h1>Your score</h1>
+  <p class="big" id="sBig"></p>
+  <p class="hand" id="sLine"></p>
+  <ul class="review" id="sReview"></ul>
+  <button class="btn" id="verdictB">See the verdict</button>
+</section>
+
+<!-- PAGE 4: VERDICT -->
+<section class="page" id="p4" hidden>
+  <p class="step">Step 5 of 5 &middot; The door</p>
+  <h1 id="vTitle"></h1>
+  <div class="doorway" id="door"><div class="inside" id="inside"></div><div class="door l"></div><div class="door r"></div><div class="lock" id="lockI" hidden>&#128274;</div></div>
+  <img class="ele" id="e4" alt="Elephant" hidden>
+  <div class="note" id="vNote"></div>
+  <p class="hand" id="bribeL" hidden>Want another chance? Bribe me with 10 momos again! &#129375;&#128024;</p>
+  <button class="btn" id="againB" hidden>Try again: bribe the baby elephant &#129375;</button>
+</section>
+
+</main>
+
+<script>
+const $=id=>document.getElementById(id);
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ===== QUESTIONS (a = index of the correct option) ===== */
+const Q=[
+ {q:"What is Rohit's favourite sport?", o:["Cricket","Football","Badminton","Kabaddi"], a:1},
+ {q:"Which is Rohit's favourite football club?", o:["Real Madrid","Chelsea","Barcelona","Manchester United"], a:1},
+ {q:"Who is Rohit's current favourite person?", o:["Shruchi","Rohit himself","Kundan","The baby elephant"], a:0},
+ {q:"What kind of work does Rohit do?", o:["Drones","Software","Banking","Hotel management"], a:0},
+ {q:"When is Rohit's birthday?", o:["30 November","27 November","13 November","3 November"], a:0},
+ {q:"Where has Rohit been living for the past few days?", o:["Raipur","Jagdalpur","Bengaluru","Shruchi's heart"], a:3, note:"Only one right answer. He lives in your heart. \u{1F496}"},
+ {q:"How many sisters does Rohit have?", o:["Two","Three","Four","Five"], a:2},
+ {q:"What did Rohit study in his M.Tech?", o:["Computer Science","Thermal Engineering","Civil Engineering","Electronics"], a:1},
+ {q:"Before Redwing, Rohit worked with PHED, Government of Chhattisgarh, and\u2026", o:["WHO","World Bank","UNICEF","Tata Trusts"], a:2},
+ {q:"Which MBA is Rohit dreaming of?", o:["ISB","NUS Singapore","Imperial College London","Harvard"], a:1},
+ {q:"Which holy yatra has Rohit NOT completed yet?", o:["Char Dham","Kailash Mansarovar","Amarnath","12 Jyotirlinga"], a:2, note:"Amarnath. Still on his list. \u{1F64F}"},
+ {q:"What would Rohit love to eat?", o:["Momos","Pizza","Pasta","Shruchi's cheek"], a:3, note:"Your cheek. Sorry momos. \u{1F618}"},
+ {q:"When Rohit gives his word (zubaan), what does he do?", o:["Takes it back if needed","Keeps it, no matter what","Forgets it by Monday","Depends on his mood"], a:1, note:"Zubaan di hai toh nibhayega. Always."},
+ {q:"What does Rohit value the most in a person?", o:["Money","Looks","Truth & honesty","Fame"], a:2},
+ {q:"Does Rohit ever lie to you?", o:["Never","Sometimes","Only about momos","Only on Mondays"], a:0, note:"Never. Truth always, even when it's hard."},
+ {q:"What does Rohit like most about Shruchi?", o:["Shruchi's hairline","Shruchi's body fragrance","Shruchi's massa","Daant ke beech ka gap","All of the above"], a:4, note:"All of it. Every little detail."},
+ {q:"What does Rohit love to do in his spare time?", o:["Play chess","Miss Shruchi","Watch TV","Sleep all day"], a:0, note:"Chess. Missing you is full-time, not spare time. \u265F"},
+ {q:"In Rohit's game of chess, Shruchi is his\u2026", o:["Pawn","Rook","Queen","Bishop"], a:2, note:"The queen. The most powerful piece on my board. \u265B"},
+ {q:"What makes Rohit smile the most?", o:["A new drone order","A plate of momos","A message from Shruchi","A sunny Monday"], a:2},
+ {q:"Chelsea match or a date with Shruchi?", o:["Chelsea match","Date with Shruchi","Neither","Date with Shruchi while watching Chelsea's match"], a:3, note:"Why choose? You AND Chelsea. Best date ever. \u{1F499}\u26BD"},
+ {q:"Where does Rohit want to take Shruchi next?", o:["Rishikesh","Nepal","EDC Thailand","All of the above"], a:3, note:"All of it. Pack your bags."},
+ {q:"What is the first thing Rohit does when he wakes up?", o:["Checks work emails","Sends a good morning message","Looks at the photo Shruchi shared with him","Orders momos"], a:2, note:"Before anything else, your photo. \u{1F4F8}\u{1F496}"},
+ {q:"Does Shruchi like Rohit?", o:["Yes","Yes yes","Yes yes yes","YES, obviously"], a:[0,1,2,3], note:"Every answer is yes. Rohit is blushing. \u{1F633}"},
+ {q:"How many times have you broken Rohit's heart?", o:["1","2","3","4"], a:1, note:"2 times. First: the Superman t-shirt. Second: not putting in the effort to travel to Dantewada for Maa Danteshwari's blessing. \u{1F494}"},
+ {q:"If Rohit wins the tug of war, he takes you for\u2026", o:["Pizza","Biryani","Thukpa","Momos"], a:2}
+];
+const isOk=(q,k)=>Array.isArray(q.a)?q.a.includes(k):k===q.a;
+const ansIdx=q=>Array.isArray(q.a)?q.a:[q.a];
+const PASS=Math.ceil(Q.length*0.8); // what the elephant tells her
+const REAL=Q.length; // what Rohit actually wants: 100%
+
+/* ===== elephant art ===== */
+function eleSVG(sad){return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300">
+<ellipse cx="82" cy="140" rx="58" ry="64" fill="#8796b8"/><ellipse cx="86" cy="142" rx="38" ry="44" fill="#f4b6c8"/>
+<ellipse cx="218" cy="140" rx="58" ry="64" fill="#8796b8"/><ellipse cx="214" cy="142" rx="38" ry="44" fill="#f4b6c8"/>
+<ellipse cx="150" cy="235" rx="70" ry="50" fill="#9aa8c4"/><circle cx="150" cy="135" r="68" fill="#9aa8c4"/>
+<path d="M135 165 C128 200 132 225 150 240 C158 246 168 240 164 232 C152 220 156 200 165 165Z" fill="#9aa8c4"/>
+${sad?`<path d="M113 130 q12-10 24 0 M163 130 q12-10 24 0" stroke="#2e2440" stroke-width="5" fill="none" stroke-linecap="round"/>
+<path d="M118 136 q-6 18 -2 34 q8 4 10 -4 q0-14 -8-30z M182 136 q6 18 2 34 q-8 4 -10 -4 q0-14 8-30z" fill="#7cc6f2"/>
+<path d="M140 160 q10-8 20 0" stroke="#2e2440" stroke-width="4" fill="none" stroke-linecap="round"/>`
+:`<circle cx="125" cy="128" r="9" fill="#2e2440"/><circle cx="175" cy="128" r="9" fill="#2e2440"/>
+<circle cx="128" cy="125" r="3" fill="#fff"/><circle cx="178" cy="125" r="3" fill="#fff"/>
+<path d="M118 158 q32 26 64 0" stroke="#2e2440" stroke-width="4" fill="#f28fae" stroke-linecap="round"/>`}
+<ellipse cx="108" cy="152" rx="11" ry="7" fill="#f28fae" opacity=".7"/><ellipse cx="192" cy="152" rx="11" ry="7" fill="#f28fae" opacity=".7"/>
+<path d="M150 70 q8-14 16-2" stroke="#6f7ea0" stroke-width="4" fill="none" stroke-linecap="round"/></svg>`}
+const HAPPY='data:image/svg+xml,'+encodeURIComponent(eleSVG(false)),SAD='data:image/svg+xml,'+encodeURIComponent(eleSVG(true));
+['e1','e2','e4'].forEach(id=>$(id).src=HAPPY);new Image().src=SAD;
+function cry(img){img.src=SAD;img.classList.remove('shake');void img.offsetWidth;img.classList.add('shake');clearTimeout(img._t);img._t=setTimeout(()=>img.src=HAPPY,1200)}
+
+/* ===== confetti ===== */
+const fx=$('fx'),fc=fx.getContext('2d');let parts=[];
+function fxSize(){fx.width=innerWidth;fx.height=innerHeight}fxSize();addEventListener('resize',fxSize);
+function burst(){if(reduce)return;const run=!parts.length;for(let i=0;i<140;i++)parts.push({x:innerWidth/2,y:innerHeight/2,vx:(Math.random()-.5)*13,vy:-Math.random()*13-4,s:6+Math.random()*10,c:['#e2557f','#f28fae','#9aa8c4','#ffd166'][i%4]});if(run)requestAnimationFrame(tick)}
+function heart(x,y,s,c){fc.fillStyle=c;fc.beginPath();fc.moveTo(x,y+s/4);fc.bezierCurveTo(x,y,x-s/2,y,x-s/2,y+s/4);fc.bezierCurveTo(x-s/2,y+s/2,x,y+s*.7,x,y+s);fc.bezierCurveTo(x,y+s*.7,x+s/2,y+s/2,x+s/2,y+s/4);fc.bezierCurveTo(x+s/2,y,x,y,x,y+s/4);fc.fill()}
+function tick(){fc.clearRect(0,0,fx.width,fx.height);parts.forEach(p=>{p.vy+=.25;p.x+=p.vx;p.y+=p.vy;heart(p.x,p.y,p.s,p.c)});parts=parts.filter(p=>p.y<innerHeight+40);if(parts.length)requestAnimationFrame(tick);else fc.clearRect(0,0,fx.width,fx.height)}
+
+const HER=`<svg viewBox="0 0 200 270" xmlns="http://www.w3.org/2000/svg">
+<path class="lock" d="M52 92 C22 140 26 205 50 248 C66 254 74 236 68 214 C58 176 60 132 72 104Z" fill="#1d1416"/>
+<rect x="88" y="145" width="24" height="34" rx="8" fill="#94603e"/>
+<path d="M36 270 Q40 188 100 176 Q160 188 164 270Z" fill="#2c3e6b"/>
+<path d="M36 270 Q38 206 66 184 L80 206 Q62 222 62 270Z" fill="#d93a3a"/>
+<path d="M164 270 Q162 206 134 184 L120 206 Q138 222 138 270Z" fill="#d93a3a"/>
+<path d="M86 177 Q100 194 114 177" stroke="#1f2d50" stroke-width="4" fill="none" stroke-linecap="round"/>
+<path d="M89 168 Q100 200 111 168" stroke="#d9ad52" stroke-width="1.6" fill="none"/>
+<path class="heartpop" d="M90 222 c0-8 10-8 10 0 c0-8 10-8 10 0 c0 8-10 14-10 17 c0-3-10-9-10-17z" fill="#e2557f"/>
+<ellipse cx="100" cy="100" rx="46" ry="53" fill="#a8704b"/>
+<ellipse cx="55" cy="104" rx="8" ry="11" fill="#a8704b"/>
+<circle cx="56" cy="117" r="3.2" fill="none" stroke="#e6e6ef" stroke-width="1.8"/>
+<path d="M54 98 Q50 42 100 40 Q150 42 146 98 Q142 66 120 58 Q104 53 100 56 Q96 53 80 58 Q58 66 54 98Z" fill="#1d1416"/>
+<path d="M100 42 L100 57" stroke="#3a2a2c" stroke-width="1.5"/>
+<path d="M72 86 q11 -6 22 -1" stroke="#1d1416" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+<path d="M106 85 q11 -5 22 1" stroke="#1d1416" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+<path d="M74 101 q9 -8 19 0" stroke="#2a1a14" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+<path d="M107 101 q9 -8 19 0" stroke="#2a1a14" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+<path d="M98 106 q-4 12 2 15 q4 1 6 -1" stroke="#7d4e32" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+<ellipse cx="76" cy="118" rx="9" ry="5" fill="#e07a86" opacity=".45"/><ellipse cx="124" cy="118" rx="9" ry="5" fill="#e07a86" opacity=".45"/>
+<path d="M84 129 q17 11 34 -3" stroke="#b5626e" stroke-width="5" fill="none" stroke-linecap="round"/>
+</svg>`;
+
+const HIM=`<svg viewBox="0 0 200 270" xmlns="http://www.w3.org/2000/svg">
+<rect x="88" y="145" width="24" height="34" rx="8" fill="#8a5a3a"/>
+<path d="M32 270 Q36 186 100 176 Q164 186 168 270Z" fill="#3d6e66"/>
+<path d="M84 177 L100 196 L116 177" stroke="#fff7f9" stroke-width="5" fill="none" stroke-linejoin="round"/>
+<ellipse cx="100" cy="102" rx="47" ry="53" fill="#9c6644"/>
+<ellipse cx="53" cy="106" rx="8" ry="11" fill="#9c6644"/><ellipse cx="147" cy="106" rx="8" ry="11" fill="#9c6644"/>
+<path d="M52 96 Q46 40 100 38 Q156 40 148 96 Q146 72 132 66 Q120 74 96 66 Q80 72 68 68 Q56 76 52 96Z" fill="#1a1414"/>
+<path d="M72 86 q11 -5 22 -1" stroke="#1a1414" stroke-width="4" fill="none" stroke-linecap="round"/>
+<path d="M106 85 q11 -4 22 1" stroke="#1a1414" stroke-width="4" fill="none" stroke-linecap="round"/>
+<g class="eyes"><circle cx="83" cy="100" r="6" fill="#22160f"/><circle cx="117" cy="100" r="6" fill="#22160f"/><circle cx="85" cy="98" r="2" fill="#fff"/><circle cx="119" cy="98" r="2" fill="#fff"/></g>
+<path d="M98 106 q-4 12 2 15 q4 1 6 -1" stroke="#6e4428" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+<path d="M82 128 q18 16 36 0" stroke="#5a2a2a" stroke-width="4.5" fill="#fff" stroke-linecap="round"/>
+<ellipse cx="74" cy="119" rx="8" ry="4.5" fill="#e07a86" opacity=".35"/><ellipse cx="126" cy="119" rx="8" ry="4.5" fill="#e07a86" opacity=".35"/>
+</svg>`;
+
+document.getElementById('herW').innerHTML=HER;document.getElementById('himW').innerHTML=HIM;
+document.getElementById('eW').src=HAPPY;
+
+/* ===== FEED (10 treats) ===== */
+(()=>{const cv=$('fCv'),ctx=cv.getContext('2d');let W=0,H=0;
+const hi=new Image(),si=new Image();hi.src=HAPPY;si.src=SAD;
+function resize(){const r=cv.getBoundingClientRect();if(!r.width)return;const d=Math.min(2,devicePixelRatio||1);W=r.width;H=r.height;cv.width=W*d;cv.height=H*d;ctx.setTransform(d,0,0,d,0,0)}
+addEventListener('resize',resize);
+const GOAL=10,TYPES=[{e:'\u{1F95F}',w:55,p:1},{e:'\u{1F336}\uFE0F',w:45,p:0}],TOT=TYPES.reduce((a,t)=>a+t.w,0);
+const lines=["Yum! More please.","You feed me better than my mom.","Momos taste better with you."];
+let items=[],sc=0,x=0,tx=0,on=false,last=0,sp=0,sadU=0,shk=0,tt;
+const pick=()=>{let r=Math.random()*TOT;for(const t of TYPES)if((r-=t.w)<0)return t;return TYPES[0]};
+function hud(){$('fScore').textContent=sc+'/'+GOAL;$('fProg').style.width=sc/GOAL*100+'%'}
+function toast(t){const e=$('fToast');e.textContent=t;e.style.opacity=1;clearTimeout(tt);tt=setTimeout(()=>e.style.opacity=0,1800)}
+function st(e){const r=cv.getBoundingClientRect();tx=Math.max(30,Math.min(W-30,e.clientX-r.left))}
+cv.addEventListener('pointerdown',e=>{st(e);try{cv.setPointerCapture(e.pointerId)}catch(_){}});
+cv.addEventListener('pointermove',e=>{if(e.pointerType==='mouse'||e.buttons||e.pressure>0)st(e)});
+addEventListener('keydown',e=>{if(!on)return;if(e.key==='ArrowLeft')tx=Math.max(30,tx-40);if(e.key==='ArrowRight')tx=Math.min(W-30,tx+40)});
+function loop(t){if(!on)return;const dt=Math.max(0,Math.min(40,t-last))/16.67;last=t;sp-=dt*16.67;
+  if(sp<=0){items.push({x:20+Math.random()*(W-40),y:-30,vy:(2.1+sc*.12)*(.85+Math.random()*.3)*(H/480),t:pick(),r:Math.random()*6});sp=620}
+  x+=(tx-x)*.25*dt;const eW=Math.min(96,W*.28),eY=H-eW*.95,fs=Math.max(26,W*.085);
+  for(const it of items){it.y+=it.vy*dt;
+    if(!it.d&&it.y>eY+eW*.15&&it.y<eY+eW*.7&&Math.abs(it.x-x)<eW*.5){it.d=true;
+      if(!it.t.p){sadU=t+99999;shk=12;on=false;draw(t,eW,eY,fs);setTimeout(chiliFail,500);return}
+      else{sc++;hud();if(sc===3||sc===6||sc===8)toast(lines[(sc===3?0:sc===6?1:2)]);if(sc>=GOAL){on=false;draw(t,eW,eY,fs);setTimeout(()=>{page('w');startWalk()},500);return}}}}
+  items=items.filter(i=>!i.d&&i.y<H+40);draw(t,eW,eY,fs);requestAnimationFrame(loop)}
+function draw(t,eW,eY,fs){ctx.clearRect(0,0,W,H);ctx.fillStyle='#fff6f8';ctx.beginPath();ctx.arc(W*.8,H*.12,W*.09,0,7);ctx.fill();
+  ctx.fillStyle='#bfe3c5';ctx.beginPath();ctx.moveTo(0,H*.9);ctx.quadraticCurveTo(W*.25,H*.86,W*.5,H*.9);ctx.quadraticCurveTo(W*.75,H*.94,W,H*.89);ctx.lineTo(W,H);ctx.lineTo(0,H);ctx.fill();
+  ctx.textAlign='center';ctx.textBaseline='middle';ctx.font=fs+'px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif';
+  for(const it of items){ctx.save();ctx.translate(it.x,it.y);ctx.rotate(Math.sin(t/300+it.r)*.25);ctx.fillText(it.t.e,0,0);ctx.restore()}
+  let sx=0;if(shk>0){sx=(Math.random()-.5)*shk;shk*=.85;if(shk<.5)shk=0}
+  const im=t<sadU?si:hi;if(im.complete)ctx.drawImage(im,x-eW/2+sx,eY+Math.sin(t/180)*2,eW,eW)}
+function chiliFail(){$('fFail').hidden=false;const e=$('eFail');e.src=SAD;e.classList.remove('shake');void e.offsetWidth;e.classList.add('shake');
+  $('failLine').textContent="I don't want to take you to Rohit. You are careless!";$('fRetry').hidden=true;
+  setTimeout(()=>{$('failLine').textContent="*sniff*\u2026 okay okay. I really want you to meet Rohit. Take another chance?";$('fRetry').hidden=false},2200)}
+$('fRetry').onclick=()=>{$('fFail').hidden=true;startFeed();$('fStart').hidden=true;resize();on=true;last=performance.now();requestAnimationFrame(loop)};
+window.startFeed=()=>{sadU=0;resize();items=[];sc=0;x=tx=W/2;hud();$('fStart').hidden=false;const eW=Math.min(96,W*.28);draw(0,eW,H-eW*.95,30)};
+$('fGo').onclick=()=>{$('fStart').hidden=true;resize();on=true;last=performance.now();requestAnimationFrame(loop)};
+})();
+
+function startWalk(){const p=document.querySelector('.walk .pair');document.querySelector('.walk').classList.remove('arrived');p.style.animation='none';void p.offsetWidth;p.style.animation='';$('wGo').hidden=true;
+  setTimeout(()=>{$('wLine').textContent='\u201CLook who\u2019s waiting, Rohit can\u2019t stop looking at you. Answer well, the door depends on it.\u201D';document.querySelector('.walk').classList.add('arrived');$('wGo').hidden=false},reduce?0:3400)}
+let attempts=0;try{attempts=parseInt(localStorage.getItem('kr-attempts')||'0',10)||0}catch(_){}
+$('wGo').onclick=()=>{attempts++;try{localStorage.setItem('kr-attempts',String(attempts))}catch(_){}bag=[];i=0;score=0;picks=[];lock=false;page(2);render()};
+
+document.querySelectorAll('.qn').forEach(e=>e.textContent=Q.length);document.querySelectorAll('.pn').forEach(e=>e.textContent=PASS);
+/* ===== flow ===== */
+function page(n){['1','f','w','2','3','4'].forEach(k=>$('p'+k).hidden=k!=String(n));scrollTo(0,0)}
+let i=0,score=0,lock=false,picks=[];
+const yay=["Correct! \u{1F496}","Yes! You know me.","Ooh, smart girl.","Point to Shruchi!","Too good \u{1F418}"];
+const neutral=[
+ "The elephant whispered it to Rohit already. \u{1F418}\u{1F4AC}",
+ "Your heart chose that one, right? \u{1F4AD}",
+ "That answer is going straight into Rohit's diary. \u{1F4D6}",
+ "Rohit just smiled. Or did he frown? \u{1F92D}",
+ "The elephant is keeping the score secret. \u{1F92B}",
+ "Bold answer! We'll see. \u{1F60C}",
+ "Hmm\u2026 I'll tell Rohit about this one. \u{1F60F}",
+ "The elephant just raised one eyebrow. \u{1F928}",
+ "Rohit is watching from the stage\u2026 \u{1F440}",
+ "Noted! The elephant is writing it down. \u{1F418}",
+ "Hmm, interesting choice\u2026 \u{1F914}"];
+let bag=[],lastN='';function pickNeutral(){if(!bag.length){bag=neutral.slice().sort(()=>Math.random()-.5);if(bag[0]===lastN)bag.push(bag.shift())}lastN=bag.shift();return lastN}
+const nay=["Wrong! The elephant is crying \u{1F62D}","Nooo, that hurt.","Hmm, we need to talk more.","Oops! One point gone."];
+
+function render(){const q=Q[i];
+  $('qNum').textContent=`${i+1}/${Q.length}`;$('qBar').style.width=(i/Q.length*100)+'%';$('qPts').textContent='\u{1F512}';
+  $('qText').textContent=q.q;$('qReact').textContent='';
+  const box=$('qOpts');box.innerHTML='';
+  q.o.forEach((o,k)=>{const b=document.createElement('button');b.className='opt';b.id=`q${i}o${k}`;b.textContent=o;b.onclick=()=>choose(k,b);box.appendChild(b)})}
+function choose(k,b){if(lock)return;lock=true;const q=Q[i];picks.push(k);
+  if(isOk(q,k))score++;b.classList.add('picked');$('qReact').textContent=pickNeutral();
+  setTimeout(()=>{i++;lock=false;if(i<Q.length)render();else showScore()},1300)}
+
+function showScore(){page(3);$('qBar').style.width='100%';
+  $('sBig').innerHTML=`${score}<small>/${Q.length}</small>`;
+  $('sLine').textContent=score===Q.length?'Perfect score! Are you secretly me?':score>=PASS?'You really do know me.':score>=PASS-3?'So close, yet so far…':'Did you even read my messages? \u{1F62D}';
+  const r=$('sReview');r.innerHTML='';
+  Q.forEach((q,k)=>{const ok=isOk(q,picks[k]),ans=ansIdx(q).map(j=>q.o[j]).join(' or ');const li=document.createElement('li');li.className=ok?'ok':'no';
+    li.innerHTML=`<span>${ok?'✅':'❌'}</span><span><b></b><br><small></small></span>`;
+    li.querySelector('b').textContent=q.q;li.querySelector('small').textContent=ok?`You said ${q.o[picks[k]]}`+(q.note?` \u2014 ${q.note}`:''):'Wrong answer.';r.appendChild(li)})}
+
+function verdict(){page(4);$('e4').hidden=true;$('againB').hidden=true;$('bribeL').hidden=true;const att=`<p class="sub">Attempt #${attempts}</p>`;const pass=score>=REAL,twist=!pass&&score>=PASS,n=$('vNote'),dr=$('door');dr.classList.remove('open');$('lockI').hidden=true;
+  $('inside').innerHTML=pass?`<div class="who">${HIM}</div><span class="momo">\u{1F95F}\u2764\uFE0F</span><div class="who">${HER}</div>`:'';
+  if(pass){setTimeout(()=>dr.classList.add('open'),500);$('vTitle').textContent='The door is opening\u2026 \u{1F496}';setTimeout(()=>$('vTitle').textContent='You know me 100%! \u{1F496}',2100);
+    n.innerHTML=`<p class="hand">Shruchi, you did it! ${score}/${Q.length} \u{1F496}</p>
+      <p>Now I believe that you know me 100%. I think you've earned your chance of meeting me.</p>
+      <p>You passed on <b>attempt #${attempts}</b>. &#127942;</p>
+      <p><b>First, send me a screenshot of this page as proof that you know me 100%.</b> &#128248; And also tell me how many times you tried, how many times you failed, and on which attempt you passed. Then I'll let you know when I'll be meeting you.</p>
+      <p>But remember, this is your place, Jagdalpur. So <b>you</b> have to take me on a date, not me. &#128527;&#129375;</p>
+      <p class="sign">Waiting for your screenshot, Rohit</p>`;setTimeout(burst,2100)}
+  else{$('lockI').hidden=false;const el=$('e4');el.hidden=false;el.src=SAD;el.classList.remove('shake');void el.offsetWidth;el.classList.add('shake');
+    if(twist){$('vTitle').textContent='Wait\u2026 the baby elephant has something to say \u{1F60F}';
+    n.innerHTML=`<p class="hand">Plot twist, Shruchi!</p>
+      <p>You scored ${score}/${Q.length}. I told you 80% is enough, and you crossed it. Well done.</p>
+      <p>And after the quiz, I came to know that <b>you have broken Rohit's heart twice</b>:</p>
+      <p>&#128148; First, by not giving him the <b>Superman t-shirt</b>.<br>&#128148; Second, by not putting in the effort to travel to <b>Dantewada for Maa Danteshwari's blessing</b>. &#128591;</p>
+      <p>So for Rohit: <b>if it's not 100%, it's not worth the meet.</b> You missed ${Q.length-score}. The door stays locked, for now. &#128274;</p>
+      <p>Rohit is right here in Jagdalpur, waiting for that perfect score. Try again, and this time, know him completely. &#128150;</p>
+      <p><b>You need to try again, Shruchi.</b> Only ${Q.length}/${Q.length} opens the door. This was attempt #${attempts}.</p>
+      <p><b>Send Rohit a screenshot of this page.</b> Let's see if you can convince him. &#128591;</p>
+      <p class="sign">Your baby elephant &#128024;</p>`;$('againB').hidden=false;$('bribeL').hidden=false}
+    else{$('vTitle').textContent='The door stays locked\u2026 \u{1F62D}';
+    n.innerHTML=`<p class="hand">Rules are rules, Shruchi.</p>
+      <p>You scored ${score}/${Q.length}, that's below 80%. You needed at least ${PASS}. Rohit is right here in Jagdalpur, but rules are rules: no meeting.</p>
+      <p>I'm crying, and honestly, so is Rohit. Maybe you should call him and learn more about him first.</p>
+      <p><b>You need to try again, Shruchi.</b> Score at least 80% next time. This was attempt #${attempts}.</p>
+      <p><b>Send Rohit a screenshot of this page anyway.</b> Maybe he'll show mercy. &#128591;</p>
+      <p class="sign">Your baby elephant &#128024;</p>`;$('againB').hidden=false;$('bribeL').hidden=false}}}
+
+$('startB').onclick=()=>{page('f');startFeed()};
+$('verdictB').onclick=verdict;
+$('againB').onclick=()=>{page('f');startFeed()};
+</script>
+</body>
+</html>
